@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/apekade
+    username: root
+    password: master
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
