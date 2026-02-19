@@ -4,17 +4,18 @@ import com.nuwandev.pos.model.Customer;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface CustomerRepository {
     List<Customer> getAllCustomers();
 
-    Optional<Customer> getCustomerById(String id);
+    Optional<Customer> getCustomerById(UUID id);
 
     void saveCustomer(Customer customer);
 
-    void updateCustomer(String id, Customer customer);
+    void updateCustomer(UUID id, Customer customer);
 
-    void deleteCustomerById(String id);
+    void deleteCustomerById(UUID id);
 
     List<Customer> searchCustomer(String q);
 

@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/customers")
@@ -25,7 +26,7 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CustomerResponseDto> getCustomerById(@PathVariable String id) {
+    public ResponseEntity<CustomerResponseDto> getCustomerById(@PathVariable UUID id) {
         CustomerResponseDto customer = customerService.getCustomerById(id);
         return ResponseEntity.ok(customer);
     }
@@ -37,13 +38,13 @@ public class CustomerController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateCustomer(@PathVariable String id, @RequestBody CustomerRequestDto requestDto) {
+    public ResponseEntity<Void> updateCustomer(@PathVariable UUID id, @RequestBody CustomerRequestDto requestDto) {
         customerService.updateCustomer(id, requestDto);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCustomerById(@PathVariable String id) {
+    public ResponseEntity<Void> deleteCustomerById(@PathVariable UUID id) {
         customerService.deleteCustomerById(id);
         return ResponseEntity.noContent().build();
     }

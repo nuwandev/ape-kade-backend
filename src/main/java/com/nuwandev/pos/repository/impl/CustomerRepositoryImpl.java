@@ -2,26 +2,26 @@ package com.nuwandev.pos.repository.impl;
 
 import com.nuwandev.pos.model.Customer;
 import com.nuwandev.pos.repository.CustomerRepository;
-import com.nuwandev.pos.util.Util;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Repository
 public class CustomerRepositoryImpl implements CustomerRepository {
 
-    JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
     @Override
     public List<Customer> getAllCustomers() {
         String sql = "SELECT * FROM customer";
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
             Customer customer = new Customer();
-            customer.setId(rs.getString("id"));
+            customer.setId(fromBytes(rs.getBytes("id")));
             customer.setTitle(rs.getString("title"));
             customer.setName(rs.getString("name"));
             customer.setDob(rs.getDate("dob"));
@@ -37,11 +37,11 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     @Override
-    public Optional<Customer> getCustomerById(String id) {
+    public Optional<Customer> getCustomerById(UUID id) {
         String sql = "SELECT * FROM customer WHERE id = ?";
         List<Customer> customers = jdbcTemplate.query(sql, (rs, rowNum) -> {
             Customer customer = new Customer();
-            customer.setId(rs.getString("id"));
+            customer.setId(fromBytes(rs.getBytes("id")));
             customer.setTitle(rs.getString("title"));
             customer.setName(rs.getString("name"));
             customer.setDob(rs.getDate("dob"));
@@ -53,7 +53,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
             customer.setCreatedAt(rs.getTimestamp("created_at"));
             customer.setUpdatedAt(rs.getTimestamp("updated_at"));
             return customer;
-        }, id);
+        }, toBytes(id));
         return customers.isEmpty() ? Optional.empty() : Optional.of(customers.get(0));
     }
 
@@ -62,7 +62,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
         String sql = "INSERT INTO customer (id, title, name, dob, salary, address, city, province, postal_code) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         jdbcTemplate.update(
                 sql,
-                Util.generateCustomerId(),
+                toBytes(customer.getId()),
                 customer.getTitle(),
                 customer.getName(),
                 customer.getDob(),
@@ -75,7 +75,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     @Override
-    public void updateCustomer(String id, Customer customer) {
+    public void updateCustomer(UUID id, Customer customer) {
         String sql = "UPDATE customer SET title = ?, name = ?, dob = ?, salary = ?, address = ?, city = ?, province = ?, postal_code = ? WHERE id = ?";
         jdbcTemplate.update(
             sql,
@@ -87,14 +87,14 @@ public class CustomerRepositoryImpl implements CustomerRepository {
             customer.getCity(),
             customer.getProvince(),
             customer.getPostalCode(),
-            id
+            toBytes(id)
         );
     }
 
     @Override
-    public void deleteCustomerById(String id) {
+    public void deleteCustomerById(UUID id) {
         String sql = "DELETE FROM customer WHERE id = ?";
-        jdbcTemplate.update(sql, id);
+        jdbcTemplate.update(sql, toBytes(id));
     }
 
     @Override
@@ -103,7 +103,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
         String likeQuery = "%" + q + "%";
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
             Customer customer = new Customer();
-            customer.setId(rs.getString("id"));
+            customer.setId(fromBytes(rs.getBytes("id")));
             customer.setTitle(rs.getString("title"));
             customer.setName(rs.getString("name"));
             customer.setDob(rs.getDate("dob"));
@@ -116,5 +116,23 @@ public class CustomerRepositoryImpl implements CustomerRepository {
             customer.setUpdatedAt(rs.getTimestamp("updated_at"));
             return customer;
         }, likeQuery, likeQuery, likeQuery);
+    }
+
+    private static byte[] toBytes(UUID uuid) {
+        if (uuid == null) return null;
+        long msb = uuid.getMostSignificantBits();
+        long lsb = uuid.getLeastSignificantBits();
+        byte[] buffer = new byte[16];
+        for (int i = 0; i < 8; i++) buffer[i] = (byte) (msb >>> 8 * (7 - i));
+        for (int i = 8; i < 16; i++) buffer[i] = (byte) (lsb >>> 8 * (15 - i));
+        return buffer;
+    }
+
+    private static UUID fromBytes(byte[] bytes) {
+        if (bytes == null || bytes.length != 16) return null;
+        long msb = 0, lsb = 0;
+        for (int i = 0; i < 8; i++) msb = (msb << 8) | (bytes[i] & 0xff);
+        for (int i = 8; i < 16; i++) lsb = (lsb << 8) | (bytes[i] & 0xff);
+        return new UUID(msb, lsb);
     }
 }

@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -27,23 +28,25 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void saveCustomer(CustomerRequestDto requestDto) {
-        customerRepository.saveCustomer(customerMapper.toEntity(requestDto));
+        Customer customer = customerMapper.toEntity(requestDto);
+        customer.setId(UUID.randomUUID());
+        customerRepository.saveCustomer(customer);
     }
 
     @Override
-    public CustomerResponseDto getCustomerById(String id) {
+    public CustomerResponseDto getCustomerById(UUID id) {
         Customer customer = customerRepository.getCustomerById(id)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found with id: " + id));
         return customerMapper.toResponseDto(customer);
     }
 
     @Override
-    public void deleteCustomerById(String id) {
+    public void deleteCustomerById(UUID id) {
         customerRepository.deleteCustomerById(id);
     }
 
     @Override
-    public void updateCustomer(String id, CustomerRequestDto requestDto) {
+    public void updateCustomer(UUID id, CustomerRequestDto requestDto) {
         customerRepository.updateCustomer(id, customerMapper.toEntity(requestDto));
     }
 
