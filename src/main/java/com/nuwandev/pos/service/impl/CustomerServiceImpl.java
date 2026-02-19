@@ -5,6 +5,7 @@ import com.nuwandev.pos.mapper.CustomerMapper;
 import com.nuwandev.pos.model.Customer;
 import com.nuwandev.pos.model.dto.request.CustomerRequestDto;
 import com.nuwandev.pos.model.dto.response.CustomerResponseDto;
+import com.nuwandev.pos.model.dto.response.PageResponse;
 import com.nuwandev.pos.repository.CustomerRepository;
 import com.nuwandev.pos.service.CustomerService;
 import lombok.RequiredArgsConstructor;
@@ -19,12 +20,6 @@ public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
     private final CustomerMapper customerMapper;
-
-    @Override
-    public List<CustomerResponseDto> getAllCustomers() {
-        List<Customer> allCustomers = customerRepository.getAllCustomers();
-        return customerMapper.toResponseDtoList(allCustomers);
-    }
 
     @Override
     public void saveCustomer(CustomerRequestDto requestDto) {
@@ -54,5 +49,14 @@ public class CustomerServiceImpl implements CustomerService {
     public List<CustomerResponseDto> searchCustomer(String q) {
         List<Customer> customers = customerRepository.searchCustomer(q);
         return customerMapper.toResponseDtoList(customers);
+    }
+
+    @Override
+    public PageResponse<CustomerResponseDto> getCustomers(int page, int size, String sortBy, String direction) {
+        List<Customer> customers = customerRepository.getCustomers(page, size, sortBy, direction);
+        long totalElements = customerRepository.countCustomers();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+        List<CustomerResponseDto> content = customerMapper.toResponseDtoList(customers);
+        return new PageResponse<>(content, page, size, totalElements, totalPages);
     }
 }

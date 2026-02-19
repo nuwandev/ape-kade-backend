@@ -2,6 +2,7 @@ package com.nuwandev.pos.controller;
 
 import com.nuwandev.pos.model.dto.request.CustomerRequestDto;
 import com.nuwandev.pos.model.dto.response.CustomerResponseDto;
+import com.nuwandev.pos.model.dto.response.PageResponse;
 import com.nuwandev.pos.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,10 +21,16 @@ public class CustomerController {
     private final CustomerService customerService;
 
     @GetMapping
-    public ResponseEntity<List<CustomerResponseDto>> getAllCustomers() {
-        List<CustomerResponseDto> responseList = customerService.getAllCustomers();
-        return ResponseEntity.ok(responseList);
+    public ResponseEntity<PageResponse<CustomerResponseDto>> getCustomers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction
+    ){
+        PageResponse<CustomerResponseDto> response = customerService.getCustomers(page, size, sortBy, direction);
+        return ResponseEntity.ok(response);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<CustomerResponseDto> getCustomerById(@PathVariable UUID id) {

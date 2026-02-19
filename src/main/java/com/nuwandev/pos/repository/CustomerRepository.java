@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface CustomerRepository {
-    List<Customer> getAllCustomers();
 
     Optional<Customer> getCustomerById(UUID id);
 
@@ -19,4 +18,7 @@ public interface CustomerRepository {
 
     List<Customer> searchCustomer(String q);
 
+    List<Customer> getCustomers(int page, int size, String sortBy, String direction);
+
+    long countCustomers();
 }

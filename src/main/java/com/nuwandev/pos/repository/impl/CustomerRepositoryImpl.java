@@ -17,26 +17,6 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public List<Customer> getAllCustomers() {
-        String sql = "SELECT * FROM customer";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> {
-            Customer customer = new Customer();
-            customer.setId(fromBytes(rs.getBytes("id")));
-            customer.setTitle(rs.getString("title"));
-            customer.setName(rs.getString("name"));
-            customer.setDob(rs.getDate("dob"));
-            customer.setSalary(rs.getDouble("salary"));
-            customer.setAddress(rs.getString("address"));
-            customer.setCity(rs.getString("city"));
-            customer.setProvince(rs.getString("province"));
-            customer.setPostalCode(rs.getString("postal_code"));
-            customer.setCreatedAt(rs.getTimestamp("created_at"));
-            customer.setUpdatedAt(rs.getTimestamp("updated_at"));
-            return customer;
-        });
-    }
-
-    @Override
     public Optional<Customer> getCustomerById(UUID id) {
         String sql = "SELECT * FROM customer WHERE id = ?";
         List<Customer> customers = jdbcTemplate.query(sql, (rs, rowNum) -> {
@@ -78,16 +58,16 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     public void updateCustomer(UUID id, Customer customer) {
         String sql = "UPDATE customer SET title = ?, name = ?, dob = ?, salary = ?, address = ?, city = ?, province = ?, postal_code = ? WHERE id = ?";
         jdbcTemplate.update(
-            sql,
-            customer.getTitle(),
-            customer.getName(),
-            customer.getDob(),
-            customer.getSalary(),
-            customer.getAddress(),
-            customer.getCity(),
-            customer.getProvince(),
-            customer.getPostalCode(),
-            toBytes(id)
+                sql,
+                customer.getTitle(),
+                customer.getName(),
+                customer.getDob(),
+                customer.getSalary(),
+                customer.getAddress(),
+                customer.getCity(),
+                customer.getProvince(),
+                customer.getPostalCode(),
+                toBytes(id)
         );
     }
 
@@ -116,6 +96,38 @@ public class CustomerRepositoryImpl implements CustomerRepository {
             customer.setUpdatedAt(rs.getTimestamp("updated_at"));
             return customer;
         }, likeQuery, likeQuery, likeQuery);
+    }
+
+    @Override
+    public List<Customer> getCustomers(int page, int size, String sortBy, String direction) {
+        int offset = page * size;
+        String orderBy = (sortBy != null && !sortBy.isEmpty()) ? sortBy : "created_at";
+        String dir = (direction != null && direction.equalsIgnoreCase("desc")) ? "DESC" : "ASC";
+        String sql = "SELECT * FROM customer ORDER BY " + orderBy + " " + dir + " LIMIT ? OFFSET ?";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Customer customer = new Customer();
+            customer.setId(fromBytes(rs.getBytes("id")));
+            customer.setTitle(rs.getString("title"));
+            customer.setName(rs.getString("name"));
+            customer.setDob(rs.getDate("dob"));
+            customer.setSalary(rs.getDouble("salary"));
+            customer.setAddress(rs.getString("address"));
+            customer.setCity(rs.getString("city"));
+            customer.setProvince(rs.getString("province"));
+            customer.setPostalCode(rs.getString("postal_code"));
+            customer.setCreatedAt(rs.getTimestamp("created_at"));
+            customer.setUpdatedAt(rs.getTimestamp("updated_at"));
+            return customer;
+        }, size, offset);
+    }
+
+    @Override
+    public long countCustomers() {
+        String sql = "SELECT COUNT(*) FROM customer";
+        return jdbcTemplate.query(sql, rs -> {
+            if (rs.next()) return rs.getLong(1);
+            return 0L;
+        });
     }
 
     private static byte[] toBytes(UUID uuid) {
