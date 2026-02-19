@@ -1,4 +1,4 @@
-package com.nuwandev.pos.model.dto;
+package com.nuwandev.pos.model.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,18 +1,18 @@
 package com.nuwandev.pos.repository;
 
 import com.nuwandev.pos.model.Customer;
-import com.nuwandev.pos.model.dto.CustomerRequestDto;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CustomerRepository {
     List<Customer> getAllCustomers();
 
-    Customer getCustomerById(String id);
+    Optional<Customer> getCustomerById(String id);
 
-    void saveCustomer(CustomerRequestDto requestDto);
+    void saveCustomer(Customer customer);
 
-    void updateCustomer(String id, CustomerRequestDto requestDto);
+    void updateCustomer(String id, Customer customer);
 
     void deleteCustomerById(String id);
 

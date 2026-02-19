@@ -1,6 +1,9 @@
-package com.nuwandev.pos.model.dto;
+package com.nuwandev.pos.model.dto.response;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Date;
 

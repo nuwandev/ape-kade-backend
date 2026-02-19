@@ -1,21 +1,22 @@
 package com.nuwandev.pos.service;
 
 import com.nuwandev.pos.model.Customer;
-import com.nuwandev.pos.model.dto.CustomerRequestDto;
+import com.nuwandev.pos.model.dto.request.CustomerRequestDto;
+import com.nuwandev.pos.model.dto.response.CustomerResponseDto;
 
 import java.util.List;
 
 public interface CustomerService {
 
-    List<Customer> getAllCustomers();
+    List<CustomerResponseDto> getAllCustomers();
 
     void saveCustomer(CustomerRequestDto requestDto);
 
-    Customer getCustomerById(String id);
+    CustomerResponseDto getCustomerById(String id);
 
     void deleteCustomerById(String id);
 
     void updateCustomer(String id, CustomerRequestDto requestDto);
 
-    List<Customer> searchCustomer(String q);
+    List<CustomerResponseDto> searchCustomer(String q);
 }

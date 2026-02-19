@@ -1,5 +1,6 @@
 package com.nuwandev.pos.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,6 +10,7 @@ import java.util.Date;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Customer {
     private String id;
     private String title;
@@ -19,4 +21,6 @@ public class Customer {
     private String city;
     private String province;
     private String postalCode;
+    private Date createdAt;
+    private Date updatedAt;
 }

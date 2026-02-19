@@ -1,7 +1,6 @@
 package com.nuwandev.pos.repository.impl;
 
 import com.nuwandev.pos.model.Customer;
-import com.nuwandev.pos.model.dto.CustomerRequestDto;
 import com.nuwandev.pos.repository.CustomerRepository;
 import com.nuwandev.pos.util.Util;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
@@ -19,70 +19,102 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     @Override
     public List<Customer> getAllCustomers() {
         String sql = "SELECT * FROM customer";
-
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
             Customer customer = new Customer();
-            customer.setId(rs.getString(1));
-            customer.setTitle(rs.getString(2));
-            customer.setName(rs.getString(3));
-            customer.setDob(rs.getDate(4));
-            customer.setSalary(rs.getDouble(5));
-            customer.setAddress(rs.getString(6));
-            customer.setCity(rs.getString(7));
-            customer.setProvince(rs.getString(8));
-            customer.setPostalCode(rs.getString(9));
+            customer.setId(rs.getString("id"));
+            customer.setTitle(rs.getString("title"));
+            customer.setName(rs.getString("name"));
+            customer.setDob(rs.getDate("dob"));
+            customer.setSalary(rs.getDouble("salary"));
+            customer.setAddress(rs.getString("address"));
+            customer.setCity(rs.getString("city"));
+            customer.setProvince(rs.getString("province"));
+            customer.setPostalCode(rs.getString("postal_code"));
+            customer.setCreatedAt(rs.getTimestamp("created_at"));
+            customer.setUpdatedAt(rs.getTimestamp("updated_at"));
             return customer;
         });
     }
 
     @Override
-    public Customer getCustomerById(String id) {
+    public Optional<Customer> getCustomerById(String id) {
         String sql = "SELECT * FROM customer WHERE id = ?";
-
-        return jdbcTemplate.queryForObject(sql, new Object[]{id}, (rs, rowNum) -> {
+        List<Customer> customers = jdbcTemplate.query(sql, (rs, rowNum) -> {
             Customer customer = new Customer();
-            customer.setId(rs.getString(1));
-            customer.setTitle(rs.getString(2));
-            customer.setName(rs.getString(3));
-            customer.setDob(rs.getDate(4));
-            customer.setSalary(rs.getDouble(5));
-            customer.setAddress(rs.getString(6));
-            customer.setCity(rs.getString(7));
-            customer.setProvince(rs.getString(8));
-            customer.setPostalCode(rs.getString(9));
+            customer.setId(rs.getString("id"));
+            customer.setTitle(rs.getString("title"));
+            customer.setName(rs.getString("name"));
+            customer.setDob(rs.getDate("dob"));
+            customer.setSalary(rs.getDouble("salary"));
+            customer.setAddress(rs.getString("address"));
+            customer.setCity(rs.getString("city"));
+            customer.setProvince(rs.getString("province"));
+            customer.setPostalCode(rs.getString("postal_code"));
+            customer.setCreatedAt(rs.getTimestamp("created_at"));
+            customer.setUpdatedAt(rs.getTimestamp("updated_at"));
             return customer;
-        });
+        }, id);
+        return customers.isEmpty() ? Optional.empty() : Optional.of(customers.get(0));
     }
 
     @Override
-    public void saveCustomer(CustomerRequestDto requestDto) {
+    public void saveCustomer(Customer customer) {
         String sql = "INSERT INTO customer (id, title, name, dob, salary, address, city, province, postal_code) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-        jdbcTemplate.update(sql,
+        jdbcTemplate.update(
+                sql,
                 Util.generateCustomerId(),
-                requestDto.getTitle(),
-                requestDto.getName(),
-                requestDto.getDob(),
-                requestDto.getSalary(),
-                requestDto.getAddress(),
-                requestDto.getCity(),
-                requestDto.getProvince(),
-                requestDto.getPostalCode()
+                customer.getTitle(),
+                customer.getName(),
+                customer.getDob(),
+                customer.getSalary(),
+                customer.getAddress(),
+                customer.getCity(),
+                customer.getProvince(),
+                customer.getPostalCode()
         );
     }
 
     @Override
-    public void updateCustomer(String id, CustomerRequestDto requestDto) {
-
+    public void updateCustomer(String id, Customer customer) {
+        String sql = "UPDATE customer SET title = ?, name = ?, dob = ?, salary = ?, address = ?, city = ?, province = ?, postal_code = ? WHERE id = ?";
+        jdbcTemplate.update(
+            sql,
+            customer.getTitle(),
+            customer.getName(),
+            customer.getDob(),
+            customer.getSalary(),
+            customer.getAddress(),
+            customer.getCity(),
+            customer.getProvince(),
+            customer.getPostalCode(),
+            id
+        );
     }
 
     @Override
     public void deleteCustomerById(String id) {
-
+        String sql = "DELETE FROM customer WHERE id = ?";
+        jdbcTemplate.update(sql, id);
     }
 
     @Override
     public List<Customer> searchCustomer(String q) {
-        return null;
+        String sql = "SELECT * FROM customer WHERE name LIKE ? OR city LIKE ? OR province LIKE ?";
+        String likeQuery = "%" + q + "%";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Customer customer = new Customer();
+            customer.setId(rs.getString("id"));
+            customer.setTitle(rs.getString("title"));
+            customer.setName(rs.getString("name"));
+            customer.setDob(rs.getDate("dob"));
+            customer.setSalary(rs.getDouble("salary"));
+            customer.setAddress(rs.getString("address"));
+            customer.setCity(rs.getString("city"));
+            customer.setProvince(rs.getString("province"));
+            customer.setPostalCode(rs.getString("postal_code"));
+            customer.setCreatedAt(rs.getTimestamp("created_at"));
+            customer.setUpdatedAt(rs.getTimestamp("updated_at"));
+            return customer;
+        }, likeQuery, likeQuery, likeQuery);
     }
 }
