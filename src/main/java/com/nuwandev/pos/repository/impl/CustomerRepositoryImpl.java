@@ -78,27 +78,6 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     @Override
-    public List<Customer> searchCustomer(String q) {
-        String sql = "SELECT * FROM customer WHERE name LIKE ? OR city LIKE ? OR province LIKE ?";
-        String likeQuery = "%" + q + "%";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> {
-            Customer customer = new Customer();
-            customer.setId(fromBytes(rs.getBytes("id")));
-            customer.setTitle(rs.getString("title"));
-            customer.setName(rs.getString("name"));
-            customer.setDob(rs.getDate("dob"));
-            customer.setSalary(rs.getDouble("salary"));
-            customer.setAddress(rs.getString("address"));
-            customer.setCity(rs.getString("city"));
-            customer.setProvince(rs.getString("province"));
-            customer.setPostalCode(rs.getString("postal_code"));
-            customer.setCreatedAt(rs.getTimestamp("created_at"));
-            customer.setUpdatedAt(rs.getTimestamp("updated_at"));
-            return customer;
-        }, likeQuery, likeQuery, likeQuery);
-    }
-
-    @Override
     public List<Customer> getCustomers(int page, int size, String sortBy, String direction) {
         int offset = page * size;
         String orderBy = (sortBy != null && !sortBy.isEmpty()) ? sortBy : "created_at";
@@ -128,6 +107,40 @@ public class CustomerRepositoryImpl implements CustomerRepository {
             if (rs.next()) return rs.getLong(1);
             return 0L;
         });
+    }
+
+    @Override
+    public List<Customer> searchCustomer(String q, int page, int size, String sortBy, String direction) {
+        int offset = page * size;
+        String orderBy = (sortBy != null && !sortBy.isEmpty()) ? sortBy : "created_at";
+        String dir = (direction != null && direction.equalsIgnoreCase("desc")) ? "DESC" : "ASC";
+        String sql = "SELECT * FROM customer WHERE name LIKE ? OR city LIKE ? OR province LIKE ? ORDER BY " + orderBy + " " + dir + " LIMIT ? OFFSET ?";
+        String likeQuery = "%" + q + "%";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Customer customer = new Customer();
+            customer.setId(fromBytes(rs.getBytes("id")));
+            customer.setTitle(rs.getString("title"));
+            customer.setName(rs.getString("name"));
+            customer.setDob(rs.getDate("dob"));
+            customer.setSalary(rs.getDouble("salary"));
+            customer.setAddress(rs.getString("address"));
+            customer.setCity(rs.getString("city"));
+            customer.setProvince(rs.getString("province"));
+            customer.setPostalCode(rs.getString("postal_code"));
+            customer.setCreatedAt(rs.getTimestamp("created_at"));
+            customer.setUpdatedAt(rs.getTimestamp("updated_at"));
+            return customer;
+        }, likeQuery, likeQuery, likeQuery, size, offset);
+    }
+
+    @Override
+    public long countSearchCustomer(String q) {
+        String sql = "SELECT COUNT(*) FROM customer WHERE name LIKE ? OR city LIKE ? OR province LIKE ?";
+        String likeQuery = "%" + q + "%";
+        return jdbcTemplate.query(sql, rs -> {
+            if (rs.next()) return rs.getLong(1);
+            return 0L;
+        }, likeQuery, likeQuery, likeQuery);
     }
 
     private static byte[] toBytes(UUID uuid) {

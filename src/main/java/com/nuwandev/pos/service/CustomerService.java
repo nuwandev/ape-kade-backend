@@ -17,7 +17,7 @@ public interface CustomerService {
 
     void updateCustomer(UUID id, CustomerRequestDto requestDto);
 
-    List<CustomerResponseDto> searchCustomer(String q);
+    PageResponse<CustomerResponseDto> searchCustomer(String q, int page, int size, String sortBy, String direction);
 
     PageResponse<CustomerResponseDto> getCustomers(int page, int size, String sortBy, String direction);
 }

@@ -46,15 +46,18 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public List<CustomerResponseDto> searchCustomer(String q) {
-        List<Customer> customers = customerRepository.searchCustomer(q);
-        return customerMapper.toResponseDtoList(customers);
-    }
-
-    @Override
     public PageResponse<CustomerResponseDto> getCustomers(int page, int size, String sortBy, String direction) {
         List<Customer> customers = customerRepository.getCustomers(page, size, sortBy, direction);
         long totalElements = customerRepository.countCustomers();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+        List<CustomerResponseDto> content = customerMapper.toResponseDtoList(customers);
+        return new PageResponse<>(content, page, size, totalElements, totalPages);
+    }
+
+    @Override
+    public PageResponse<CustomerResponseDto> searchCustomer(String q, int page, int size, String sortBy, String direction) {
+        List<Customer> customers = customerRepository.searchCustomer(q, page, size, sortBy, direction);
+        long totalElements = customerRepository.countSearchCustomer(q);
         int totalPages = (int) Math.ceil((double) totalElements / size);
         List<CustomerResponseDto> content = customerMapper.toResponseDtoList(customers);
         return new PageResponse<>(content, page, size, totalElements, totalPages);

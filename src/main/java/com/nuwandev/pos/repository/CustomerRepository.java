@@ -16,7 +16,9 @@ public interface CustomerRepository {
 
     void deleteCustomerById(UUID id);
 
-    List<Customer> searchCustomer(String q);
+    List<Customer> searchCustomer(String q, int page, int size, String sortBy, String direction);
+
+    long countSearchCustomer(String q);
 
     List<Customer> getCustomers(int page, int size, String sortBy, String direction);
 

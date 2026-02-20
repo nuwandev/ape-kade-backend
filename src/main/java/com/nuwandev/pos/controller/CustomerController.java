@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -57,8 +56,14 @@ public class CustomerController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<CustomerResponseDto>> searchCustomer(@RequestParam String q) {
-        List<CustomerResponseDto> responseList = customerService.searchCustomer(q);
-        return ResponseEntity.ok(responseList);
+    public ResponseEntity<PageResponse<CustomerResponseDto>> searchCustomer(
+            @RequestParam String q,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction
+    ) {
+        PageResponse<CustomerResponseDto> response = customerService.searchCustomer(q, page, size, sortBy, direction);
+        return ResponseEntity.ok(response);
     }
 }
