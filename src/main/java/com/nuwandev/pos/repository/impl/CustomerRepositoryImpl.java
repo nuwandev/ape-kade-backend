@@ -16,6 +16,24 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
+    private static byte[] toBytes(UUID uuid) {
+        if (uuid == null) return null;
+        long msb = uuid.getMostSignificantBits();
+        long lsb = uuid.getLeastSignificantBits();
+        byte[] buffer = new byte[16];
+        for (int i = 0; i < 8; i++) buffer[i] = (byte) (msb >>> 8 * (7 - i));
+        for (int i = 8; i < 16; i++) buffer[i] = (byte) (lsb >>> 8 * (15 - i));
+        return buffer;
+    }
+
+    private static UUID fromBytes(byte[] bytes) {
+        if (bytes == null || bytes.length != 16) return null;
+        long msb = 0, lsb = 0;
+        for (int i = 0; i < 8; i++) msb = (msb << 8) | (bytes[i] & 0xff);
+        for (int i = 8; i < 16; i++) lsb = (lsb << 8) | (bytes[i] & 0xff);
+        return new UUID(msb, lsb);
+    }
+
     @Override
     public Optional<Customer> getCustomerById(UUID id) {
         String sql = "SELECT * FROM customer WHERE id = ?";
@@ -33,7 +51,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
             customer.setCreatedAt(rs.getTimestamp("created_at"));
             customer.setUpdatedAt(rs.getTimestamp("updated_at"));
             return customer;
-        }, toBytes(id));
+        }, (Object) toBytes(id));
         return customers.isEmpty() ? Optional.empty() : Optional.of(customers.get(0));
     }
 
@@ -74,7 +92,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     @Override
     public void deleteCustomerById(UUID id) {
         String sql = "DELETE FROM customer WHERE id = ?";
-        jdbcTemplate.update(sql, toBytes(id));
+        jdbcTemplate.update(sql, (Object) toBytes(id));
     }
 
     @Override
@@ -141,23 +159,5 @@ public class CustomerRepositoryImpl implements CustomerRepository {
             if (rs.next()) return rs.getLong(1);
             return 0L;
         }, likeQuery, likeQuery, likeQuery);
-    }
-
-    private static byte[] toBytes(UUID uuid) {
-        if (uuid == null) return null;
-        long msb = uuid.getMostSignificantBits();
-        long lsb = uuid.getLeastSignificantBits();
-        byte[] buffer = new byte[16];
-        for (int i = 0; i < 8; i++) buffer[i] = (byte) (msb >>> 8 * (7 - i));
-        for (int i = 8; i < 16; i++) buffer[i] = (byte) (lsb >>> 8 * (15 - i));
-        return buffer;
-    }
-
-    private static UUID fromBytes(byte[] bytes) {
-        if (bytes == null || bytes.length != 16) return null;
-        long msb = 0, lsb = 0;
-        for (int i = 0; i < 8; i++) msb = (msb << 8) | (bytes[i] & 0xff);
-        for (int i = 8; i < 16; i++) lsb = (lsb << 8) | (bytes[i] & 0xff);
-        return new UUID(msb, lsb);
     }
 }

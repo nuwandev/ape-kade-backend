@@ -4,7 +4,6 @@ import com.nuwandev.pos.model.dto.request.CustomerRequestDto;
 import com.nuwandev.pos.model.dto.response.CustomerResponseDto;
 import com.nuwandev.pos.model.dto.response.PageResponse;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface CustomerService {

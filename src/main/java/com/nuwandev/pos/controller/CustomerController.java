@@ -25,7 +25,7 @@ public class CustomerController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String direction
-    ){
+    ) {
         PageResponse<CustomerResponseDto> response = customerService.getCustomers(page, size, sortBy, direction);
         return ResponseEntity.ok(response);
     }
