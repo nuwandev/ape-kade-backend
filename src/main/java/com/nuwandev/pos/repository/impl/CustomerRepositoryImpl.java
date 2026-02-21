@@ -16,30 +16,21 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
-    private static byte[] toBytes(UUID uuid) {
-        if (uuid == null) return null;
-        long msb = uuid.getMostSignificantBits();
-        long lsb = uuid.getLeastSignificantBits();
-        byte[] buffer = new byte[16];
-        for (int i = 0; i < 8; i++) buffer[i] = (byte) (msb >>> 8 * (7 - i));
-        for (int i = 8; i < 16; i++) buffer[i] = (byte) (lsb >>> 8 * (15 - i));
-        return buffer;
-    }
+    private static final List<String> ALLOWED_SORT_COLUMNS = List.of(
+            "id", "title", "name", "dob", "salary", "address", "city", "province", "postal_code", "created_at", "updated_at"
+    );
 
-    private static UUID fromBytes(byte[] bytes) {
-        if (bytes == null || bytes.length != 16) return null;
-        long msb = 0, lsb = 0;
-        for (int i = 0; i < 8; i++) msb = (msb << 8) | (bytes[i] & 0xff);
-        for (int i = 8; i < 16; i++) lsb = (lsb << 8) | (bytes[i] & 0xff);
-        return new UUID(msb, lsb);
+    private String validateSortBy(String sortBy) {
+        if (sortBy == null || sortBy.isEmpty()) return "created_at";
+        return ALLOWED_SORT_COLUMNS.contains(sortBy) ? sortBy : "created_at";
     }
 
     @Override
     public Optional<Customer> getCustomerById(UUID id) {
-        String sql = "SELECT * FROM customer WHERE id = ?";
+        String sql = "SELECT BIN_TO_UUID(id) as id_str, title, name, dob, salary, address, city, province, postal_code, created_at, updated_at FROM customer WHERE id = UUID_TO_BIN(?)";
         List<Customer> customers = jdbcTemplate.query(sql, (rs, rowNum) -> {
             Customer customer = new Customer();
-            customer.setId(fromBytes(rs.getBytes("id")));
+            customer.setId(UUID.fromString(rs.getString("id_str")));
             customer.setTitle(rs.getString("title"));
             customer.setName(rs.getString("name"));
             customer.setDob(rs.getDate("dob"));
@@ -51,16 +42,16 @@ public class CustomerRepositoryImpl implements CustomerRepository {
             customer.setCreatedAt(rs.getTimestamp("created_at"));
             customer.setUpdatedAt(rs.getTimestamp("updated_at"));
             return customer;
-        }, (Object) toBytes(id));
+        }, id.toString());
         return customers.isEmpty() ? Optional.empty() : Optional.of(customers.get(0));
     }
 
     @Override
     public void saveCustomer(Customer customer) {
-        String sql = "INSERT INTO customer (id, title, name, dob, salary, address, city, province, postal_code) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO customer (id, title, name, dob, salary, address, city, province, postal_code) VALUES (UUID_TO_BIN(?), ?, ?, ?, ?, ?, ?, ?, ?)";
         jdbcTemplate.update(
                 sql,
-                toBytes(customer.getId()),
+                customer.getId().toString(),
                 customer.getTitle(),
                 customer.getName(),
                 customer.getDob(),
@@ -74,7 +65,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
     @Override
     public void updateCustomer(UUID id, Customer customer) {
-        String sql = "UPDATE customer SET title = ?, name = ?, dob = ?, salary = ?, address = ?, city = ?, province = ?, postal_code = ? WHERE id = ?";
+        String sql = "UPDATE customer SET title = ?, name = ?, dob = ?, salary = ?, address = ?, city = ?, province = ?, postal_code = ? WHERE id = UUID_TO_BIN(?)";
         jdbcTemplate.update(
                 sql,
                 customer.getTitle(),
@@ -85,25 +76,25 @@ public class CustomerRepositoryImpl implements CustomerRepository {
                 customer.getCity(),
                 customer.getProvince(),
                 customer.getPostalCode(),
-                toBytes(id)
+                id.toString()
         );
     }
 
     @Override
     public void deleteCustomerById(UUID id) {
-        String sql = "DELETE FROM customer WHERE id = ?";
-        jdbcTemplate.update(sql, (Object) toBytes(id));
+        String sql = "DELETE FROM customer WHERE id = UUID_TO_BIN(?)";
+        jdbcTemplate.update(sql, id.toString());
     }
 
     @Override
     public List<Customer> getCustomers(int page, int size, String sortBy, String direction) {
         int offset = page * size;
-        String orderBy = (sortBy != null && !sortBy.isEmpty()) ? sortBy : "created_at";
+        String orderBy = validateSortBy(sortBy);
         String dir = (direction != null && direction.equalsIgnoreCase("desc")) ? "DESC" : "ASC";
-        String sql = "SELECT * FROM customer ORDER BY " + orderBy + " " + dir + " LIMIT ? OFFSET ?";
+        String sql = "SELECT BIN_TO_UUID(id) as id_str, title, name, dob, salary, address, city, province, postal_code, created_at, updated_at FROM customer ORDER BY " + orderBy + " " + dir + " LIMIT ? OFFSET ?";
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
             Customer customer = new Customer();
-            customer.setId(fromBytes(rs.getBytes("id")));
+            customer.setId(UUID.fromString(rs.getString("id_str")));
             customer.setTitle(rs.getString("title"));
             customer.setName(rs.getString("name"));
             customer.setDob(rs.getDate("dob"));
@@ -130,13 +121,13 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     @Override
     public List<Customer> searchCustomer(String q, int page, int size, String sortBy, String direction) {
         int offset = page * size;
-        String orderBy = (sortBy != null && !sortBy.isEmpty()) ? sortBy : "created_at";
+        String orderBy = validateSortBy(sortBy);
         String dir = (direction != null && direction.equalsIgnoreCase("desc")) ? "DESC" : "ASC";
-        String sql = "SELECT * FROM customer WHERE name LIKE ? OR city LIKE ? OR province LIKE ? ORDER BY " + orderBy + " " + dir + " LIMIT ? OFFSET ?";
+        String sql = "SELECT BIN_TO_UUID(id) as id_str, title, name, dob, salary, address, city, province, postal_code, created_at, updated_at FROM customer WHERE name LIKE ? OR city LIKE ? OR province LIKE ? ORDER BY " + orderBy + " " + dir + " LIMIT ? OFFSET ?";
         String likeQuery = "%" + q + "%";
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
             Customer customer = new Customer();
-            customer.setId(fromBytes(rs.getBytes("id")));
+            customer.setId(UUID.fromString(rs.getString("id_str")));
             customer.setTitle(rs.getString("title"));
             customer.setName(rs.getString("name"));
             customer.setDob(rs.getDate("dob"));
