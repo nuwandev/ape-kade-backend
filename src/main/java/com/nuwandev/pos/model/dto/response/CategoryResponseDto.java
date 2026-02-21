@@ -1,4 +1,4 @@
-package com.nuwandev.pos.model;
+package com.nuwandev.pos.model.dto.response;
 
 import com.nuwandev.pos.model.enums.CategoryVisibility;
 import lombok.AllArgsConstructor;
@@ -13,7 +13,7 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Category {
+public class CategoryResponseDto {
     private UUID id;
     private String displayName;
     private String tagline;
