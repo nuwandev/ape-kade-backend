@@ -12,3 +12,7 @@ CREATE TABLE customer
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+CREATE INDEX idx_customer_name ON customer (name);
+CREATE INDEX idx_customer_city ON customer (city);
+CREATE INDEX idx_customer_province ON customer (province);

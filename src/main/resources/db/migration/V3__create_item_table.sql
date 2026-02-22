@@ -14,5 +14,4 @@ CREATE TABLE item
     CONSTRAINT fk_item_category FOREIGN KEY (category_id) REFERENCES category (id)
 ) ENGINE = InnoDB;
 
--- Indexes for the Search Bar (Search by name or SKU)
 CREATE INDEX idx_item_search ON item (name, sku);

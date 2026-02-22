@@ -13,5 +13,5 @@ CREATE TABLE category
     UNIQUE KEY uk_category_slug (slug)
 );
 
--- Index for high-performance frontend lookups
 CREATE INDEX idx_category_visibility ON category (visibility);
+CREATE INDEX idx_category_slug ON category (slug);
