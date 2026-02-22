@@ -75,7 +75,7 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 
     private Integer findItemCount(UUID id) {
         String sql = "SELECT COUNT(*) FROM item WHERE category_id = UUID_TO_BIN(?)";
-        return jdbc.queryForObject(sql, new Object[]{id.toString()}, Integer.class);
+        return jdbc.queryForObject(sql, Integer.class, id.toString());
     }
 
     @Override
@@ -91,12 +91,12 @@ public class CategoryRepositoryImpl implements CategoryRepository {
     public boolean isSlugAvailable(String slug, UUID excludeId) {
         if (excludeId == null) {
             String sql = "SELECT COUNT(*) FROM category WHERE slug = ?";
-            Integer count = jdbc.queryForObject(sql, new Object[]{slug}, Integer.class);
-            return count == 0;
+            Integer count = jdbc.queryForObject(sql, Integer.class, slug);
+            return count != null && count == 0;
         } else {
             String sql = "SELECT COUNT(*) FROM category WHERE slug = ? AND id != UUID_TO_BIN(?)";
-            Integer count = jdbc.queryForObject(sql, new Object[]{slug, excludeId.toString()}, Integer.class);
-            return count == 0;
+            Integer count = jdbc.queryForObject(sql, Integer.class, slug, excludeId.toString());
+            return count != null && count == 0;
         }
     }
 
