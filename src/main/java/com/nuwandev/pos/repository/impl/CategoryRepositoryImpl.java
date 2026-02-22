@@ -13,15 +13,24 @@ import java.util.UUID;
 @Repository
 @RequiredArgsConstructor
 public class CategoryRepositoryImpl implements CategoryRepository {
+
     private final JdbcTemplate jdbc;
 
     public List<Category> findAllWithCount() {
         String sql = """
-            SELECT BIN_TO_UUID(c.id) as id_str, c.display_name, c.tagline, c.slug, c.visibility, c.icon, c.seo_description, c.created_id, COUNT(i.id) as item_count 
-            FROM category c 
-            LEFT JOIN items i ON c.id = i.category_id 
-            GROUP BY c.id
-        """;
+                    SELECT BIN_TO_UUID(c.id) as id_str,
+                           c.display_name,
+                           c.tagline,
+                           c.slug,
+                           c.visibility,
+                           c.icon,
+                           c.seo_description,
+                           c.created_at,
+                           COUNT(i.id) as item_count
+                    FROM category c
+                    LEFT JOIN item i ON c.id = i.category_id
+                    GROUP BY c.id
+                """;
         return jdbc.query(sql, (rs, rowNum) -> {
             Category category = new Category();
             category.setId(UUID.fromString(rs.getString("id_str")));
@@ -31,7 +40,7 @@ public class CategoryRepositoryImpl implements CategoryRepository {
             category.setVisibility(CategoryVisibility.valueOf(rs.getString("visibility")));
             category.setIcon(rs.getString("icon"));
             category.setSeoDescription(rs.getString("seo_description"));
-            category.setCreatedAt(rs.getTimestamp("created_id").toLocalDateTime());
+            category.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
             category.setItemCount(rs.getInt("item_count"));
 
             return category;

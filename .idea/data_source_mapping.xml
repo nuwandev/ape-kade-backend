@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourcePerFileMappings">
+    <file url="file://$PROJECT_DIR$/src/main/java/com/nuwandev/pos/repository/impl/CategoryRepositoryImpl.java" value="2d5174ee-42cb-4e22-82e1-3a93759b41bd" />
     <file url="file://$PROJECT_DIR$/src/main/java/com/nuwandev/pos/repository/impl/CustomerRepositoryImpl.java" value="2d5174ee-42cb-4e22-82e1-3a93759b41bd" />
     <file url="file://$PROJECT_DIR$/src/main/resources/db/migration/V1__create_customer_table.sql" value="2d5174ee-42cb-4e22-82e1-3a93759b41bd" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/db/migration/V3__create_item_table.sql" value="2d5174ee-42cb-4e22-82e1-3a93759b41bd" />
   </component>
 </project>

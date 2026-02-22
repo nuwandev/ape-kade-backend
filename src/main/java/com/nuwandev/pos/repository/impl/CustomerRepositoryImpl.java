@@ -14,11 +14,10 @@ import java.util.UUID;
 @Repository
 public class CustomerRepositoryImpl implements CustomerRepository {
 
-    private final JdbcTemplate jdbcTemplate;
-
     private static final List<String> ALLOWED_SORT_COLUMNS = List.of(
             "id", "title", "name", "dob", "salary", "address", "city", "province", "postal_code", "created_at", "updated_at"
     );
+    private final JdbcTemplate jdbcTemplate;
 
     private String validateSortBy(String sortBy) {
         if (sortBy == null || sortBy.isEmpty()) return "created_at";

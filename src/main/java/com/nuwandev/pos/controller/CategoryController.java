@@ -1,14 +1,15 @@
 package com.nuwandev.pos.controller;
 
+import com.nuwandev.pos.model.dto.request.CategoryRequestDto;
 import com.nuwandev.pos.model.dto.response.CategoryResponseDto;
 import com.nuwandev.pos.service.CategoryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("categories")
@@ -23,4 +24,21 @@ public class CategoryController {
         return ResponseEntity.ok(categories);
     }
 
+    @PostMapping
+    public ResponseEntity<CategoryResponseDto> createCategory(@RequestBody CategoryRequestDto requestDto) {
+        CategoryResponseDto savedCategory = categoryService.createCategory(requestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CategoryResponseDto> updateCategory(@PathVariable UUID id, @RequestBody CategoryRequestDto requestDto) {
+        CategoryResponseDto updatedCategory = categoryService.updateCategory(id, requestDto);
+        return ResponseEntity.ok(updatedCategory);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCategory(@PathVariable UUID id) {
+        categoryService.deleteCategory(id);
+        return ResponseEntity.noContent().build();
+    }
 }
