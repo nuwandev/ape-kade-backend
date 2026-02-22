@@ -1,5 +1,6 @@
 package com.nuwandev.pos.model.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.nuwandev.pos.model.enums.CategoryVisibility;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,6 +14,7 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CategoryResponseDto {
     private UUID id;
     private String displayName;

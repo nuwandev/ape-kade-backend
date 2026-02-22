@@ -40,7 +40,7 @@ public class CategoryRepositoryImpl implements CategoryRepository {
                 category.setVisibility(CategoryVisibility.valueOf(rs.getString("visibility")));
                 category.setIcon(rs.getString("icon"));
                 category.setSeoDescription(rs.getString("seo_description"));
-                category.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                category.setCreatedAt(rs.getTimestamp("created_at"));
                 return Optional.of(category);
             } else {
                 return Optional.empty();
@@ -124,7 +124,7 @@ public class CategoryRepositoryImpl implements CategoryRepository {
             category.setVisibility(CategoryVisibility.valueOf(rs.getString("visibility")));
             category.setIcon(rs.getString("icon"));
             category.setSeoDescription(rs.getString("seo_description"));
-            category.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+            category.setCreatedAt(rs.getTimestamp("created_at"));
             category.setItemCount(rs.getInt("item_count"));
 
             return category;

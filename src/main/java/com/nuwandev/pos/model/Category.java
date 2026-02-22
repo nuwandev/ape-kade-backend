@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 import java.util.UUID;
 
 @Getter
@@ -21,6 +21,6 @@ public class Category {
     private CategoryVisibility visibility;
     private String icon;
     private String seoDescription;
-    private LocalDateTime createdAt;
+    private Timestamp createdAt;
     private Integer itemCount;
 }
