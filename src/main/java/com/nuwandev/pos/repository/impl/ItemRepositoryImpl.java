@@ -47,26 +47,26 @@ public class ItemRepositoryImpl implements ItemRepository {
         String orderBy = validateSortBy(sortBy);
         String dir = (direction != null && direction.equalsIgnoreCase("desc")) ? "DESC" : "ASC";
         String sql = """
-                SELECT BIN_TO_UUID(i.id) as id_str,
-                       i.sku,
-                       i.name,
-                       i.description,
-                       i.price,
-                       BIN_TO_UUID(i.category_id) as cat_id_str,
-                       i.created_at,
-                       i.current_stock,
-                       i.alert_level,
-                       i.updated_at,
-                       c.display_name as cat_display_name,
-                       c.tagline as cat_tagline,
-                       c.slug as cat_slug,
-                       c.visibility as cat_visibility,
-                       c.icon as cat_icon,
-                       c.seo_description as cat_seo_description,
-                       c.created_at as cat_created_at
-                FROM item i
-                LEFT JOIN category c ON i.category_id = c.id
-                ORDER BY """ + orderBy + " " + dir + " LIMIT ? OFFSET ?";
+            SELECT BIN_TO_UUID(i.id) as id_str,
+                   i.sku,
+                   i.name,
+                   i.description,
+                   i.price,
+                   BIN_TO_UUID(i.category_id) as cat_id_str,
+                   i.created_at,
+                   i.current_stock,
+                   i.alert_level,
+                   i.updated_at,
+                   c.display_name as cat_display_name,
+                   c.tagline as cat_tagline,
+                   c.slug as cat_slug,
+                   c.visibility as cat_visibility,
+                   c.icon as cat_icon,
+                   c.seo_description as cat_seo_description,
+                   c.created_at as cat_created_at
+            FROM item i
+            LEFT JOIN category c ON i.category_id = c.id
+            ORDER BY\s""" + orderBy + " " + dir + " LIMIT ? OFFSET ?";
         return jdbc.query(sql, (rs, rowNum) -> mapRow(rs), size, offset);
     }
 
