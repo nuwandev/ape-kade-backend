@@ -24,4 +24,6 @@ public class Item {
     private Integer currentStock;
     private Integer alertLevel;
     private Timestamp updatedAt;
+
+    private Category category;
 }

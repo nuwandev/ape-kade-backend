@@ -32,8 +32,8 @@ public class ItemServiceImpl implements ItemService {
     public PageResponse<ItemResponseDto> getItems(int page, int size, String sortBy, String direction) {
         List<Item> items = itemRepository.findAll(page, size, sortBy, direction);
         long totalElements = itemRepository.countItems();
-        int totalPages = (int) Math.ceil((double) totalElements / size);
         List<ItemResponseDto> content = itemMapper.toDtoList(items);
+        int totalPages = (int) Math.ceil((double) totalElements / size);
         return new PageResponse<>(content, page, size, totalElements, totalPages);
     }
 
