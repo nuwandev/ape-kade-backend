@@ -9,7 +9,7 @@ import com.nuwandev.pos.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,7 +30,7 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryResponseDto createCategory(CategoryRequestDto requestDto) {
         Category category = mapper.toEntity(requestDto);
         category.setId(UUID.randomUUID());
-        category.setCreatedAt(LocalDateTime.now());
+        category.setCreatedAt(new Timestamp(System.currentTimeMillis()));
         category.setItemCount(0);
 
         Category savedCategory = categoryRepository.save(category);
