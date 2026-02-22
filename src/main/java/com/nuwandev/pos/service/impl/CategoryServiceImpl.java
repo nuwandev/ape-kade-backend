@@ -59,7 +59,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Boolean isSlugAvailable(String slug) {
-        return !categoryRepository.existsBySlug(slug);
+    public Boolean isSlugAvailable(String slug, UUID excludeId) {
+        return !categoryRepository.isSlugAvailable(slug, excludeId);
     }
 }

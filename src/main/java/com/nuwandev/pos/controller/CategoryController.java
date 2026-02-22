@@ -43,7 +43,10 @@ public class CategoryController {
     }
 
     @GetMapping("/check-slug/{slug}")
-    public ResponseEntity<Boolean> isSlugAvailable(@PathVariable String slug) {
-        return ResponseEntity.ok(categoryService.isSlugAvailable(slug));
+    public ResponseEntity<Boolean> isSlugAvailable(
+            @PathVariable String slug,
+            @RequestParam(required = false) UUID excludeId
+    ) {
+        return ResponseEntity.ok(categoryService.isSlugAvailable(slug, excludeId));
     }
 }

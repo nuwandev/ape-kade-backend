@@ -17,5 +17,5 @@ public interface CategoryRepository {
 
     void deleteById(UUID id);
 
-    boolean existsBySlug(String slug);
+    boolean isSlugAvailable(String slug, UUID excludeId);
 }

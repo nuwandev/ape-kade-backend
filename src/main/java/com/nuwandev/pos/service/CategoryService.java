@@ -15,5 +15,5 @@ public interface CategoryService {
 
     void deleteCategory(UUID id);
 
-    Boolean isSlugAvailable(String slug);
+    Boolean isSlugAvailable(String slug, UUID excludeId);
 }
