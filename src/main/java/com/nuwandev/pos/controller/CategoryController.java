@@ -41,4 +41,9 @@ public class CategoryController {
         categoryService.deleteCategory(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/check-slug/{slug}")
+    public ResponseEntity<Boolean> isSlugAvailable(@PathVariable String slug) {
+        return ResponseEntity.ok(categoryService.isSlugAvailable(slug));
+    }
 }

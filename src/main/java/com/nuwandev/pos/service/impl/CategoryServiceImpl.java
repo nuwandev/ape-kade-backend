@@ -57,4 +57,9 @@ public class CategoryServiceImpl implements CategoryService {
     public void deleteCategory(UUID id) {
         categoryRepository.deleteById(id);
     }
+
+    @Override
+    public Boolean isSlugAvailable(String slug) {
+        return !categoryRepository.existsBySlug(slug);
+    }
 }

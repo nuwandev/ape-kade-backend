@@ -87,6 +87,13 @@ public class CategoryRepositoryImpl implements CategoryRepository {
         }
     }
 
+    @Override
+    public boolean existsBySlug(String slug) {
+        String sql = "SELECT COUNT(*) FROM category WHERE slug = ?";
+        Integer count = jdbc.queryForObject(sql, new Object[]{slug}, Integer.class);
+        return count != null && count > 0;
+    }
+
     public List<Category> findAllWithCount() {
         String sql = """
                     SELECT BIN_TO_UUID(c.id) as id_str,

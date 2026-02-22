@@ -16,4 +16,6 @@ public interface CategoryRepository {
     Category update(Category category);
 
     void deleteById(UUID id);
+
+    boolean existsBySlug(String slug);
 }

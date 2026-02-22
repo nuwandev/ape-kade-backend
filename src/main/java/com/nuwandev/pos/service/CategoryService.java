@@ -14,4 +14,6 @@ public interface CategoryService {
     CategoryResponseDto updateCategory(UUID id, CategoryRequestDto requestDto);
 
     void deleteCategory(UUID id);
+
+    Boolean isSlugAvailable(String slug);
 }
