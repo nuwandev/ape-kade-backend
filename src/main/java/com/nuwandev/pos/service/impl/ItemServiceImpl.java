@@ -1,0 +1,81 @@
+package com.nuwandev.pos.service.impl;
+
+import com.nuwandev.pos.exception.CategoryNotFoundException;
+import com.nuwandev.pos.mapper.CategoryMapper;
+import com.nuwandev.pos.mapper.ItemMapper;
+import com.nuwandev.pos.model.Category;
+import com.nuwandev.pos.model.Item;
+import com.nuwandev.pos.model.dto.request.ItemRequestDto;
+import com.nuwandev.pos.model.dto.response.ItemResponseDto;
+import com.nuwandev.pos.model.dto.response.PageResponse;
+import com.nuwandev.pos.repository.CategoryRepository;
+import com.nuwandev.pos.repository.ItemRepository;
+import com.nuwandev.pos.service.ItemService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class ItemServiceImpl implements ItemService {
+
+    private final ItemRepository itemRepository;
+    private final ItemMapper itemMapper;
+    private final CategoryRepository categoryRepository;
+    private final CategoryMapper categoryMapper;
+
+    @Override
+    public PageResponse<ItemResponseDto> getItems(int page, int size, String sortBy, String direction) {
+        List<Item> items = itemRepository.findAll(page, size, sortBy, direction);
+        long totalElements = itemRepository.countItems();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+        List<ItemResponseDto> content = itemMapper.toDtoList(items);
+        return new PageResponse<>(content, page, size, totalElements, totalPages);
+    }
+
+    @Override
+    public ItemResponseDto createItem(ItemRequestDto itemRequest) {
+        Category category = categoryRepository.findById(itemRequest.getCategoryId()).orElseThrow(() ->
+                new CategoryNotFoundException("Category not found with id " + itemRequest.getCategoryId())
+        );
+
+        Item item = itemMapper.toEntity(itemRequest);
+        item.setId(UUID.randomUUID());
+        item.setCreatedAt(new java.sql.Timestamp(System.currentTimeMillis()));
+        item.setUpdatedAt(new java.sql.Timestamp(System.currentTimeMillis()));
+        item.setCategoryId(itemRequest.getCategoryId());
+        Item savedItem = itemRepository.save(item);
+
+        ItemResponseDto response = itemMapper.toDto(savedItem);
+        response.setCategory(categoryMapper.toDto(category));
+        return response;
+    }
+
+    @Override
+    public ItemResponseDto updateItem(String id, ItemRequestDto itemRequest) {
+        UUID uuid = UUID.fromString(id);
+        Item item = itemRepository.findById(uuid)
+                .orElseThrow(() -> new RuntimeException("Item not found with id " + id));
+        Item updated = itemMapper.toEntity(itemRequest);
+        updated.setId(item.getId());
+        updated.setCreatedAt(item.getCreatedAt());
+        updated.setUpdatedAt(new java.sql.Timestamp(System.currentTimeMillis()));
+        updated.setCategoryId(itemRequest.getCategoryId());
+        Item saved = itemRepository.update(updated);
+        Category category = categoryRepository.findById(updated.getCategoryId())
+                .orElse(null);
+        ItemResponseDto response = itemMapper.toDto(saved);
+        if (category != null) {
+            response.setCategory(categoryMapper.toDto(category));
+        }
+        return response;
+    }
+
+    @Override
+    public void deleteItem(String id) {
+        UUID uuid = UUID.fromString(id);
+        itemRepository.deleteById(uuid);
+    }
+}
