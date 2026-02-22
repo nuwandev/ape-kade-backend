@@ -46,4 +46,28 @@ public class CategoryRepositoryImpl implements CategoryRepository {
             return category;
         });
     }
+
+    @Override
+    public Category save(Category category) {
+        String sql = """
+                    INSERT INTO category(id, display_name, tagline, slug, visibility, icon, seo_description, created_at)
+                    VALUES (UUID_TO_BIN(?), ?, ?, ?, ?, ?, ?, ?)
+                """;
+        boolean isSaved = jdbc.update(
+                sql,
+                category.getId().toString(),
+                category.getDisplayName(),
+                category.getTagline(),
+                category.getSlug(),
+                category.getVisibility().name(),
+                category.getIcon(),
+                category.getSeoDescription(),
+                category.getCreatedAt()
+        ) > 0;
+        if (isSaved) {
+            return category;
+        } else {
+            throw new RuntimeException("Failed to save category");
+        }
+    }
 }
