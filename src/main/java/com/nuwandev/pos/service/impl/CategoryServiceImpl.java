@@ -39,11 +39,22 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryResponseDto updateCategory(UUID id, CategoryRequestDto requestDto) {
-        return null;
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        category.setDisplayName(requestDto.getDisplayName());
+        category.setTagline(requestDto.getTagline());
+        category.setSlug(requestDto.getSlug());
+        category.setVisibility(requestDto.getVisibility());
+        category.setIcon(requestDto.getIcon());
+        category.setSeoDescription(requestDto.getSeoDescription());
+
+        Category updatedCategory = categoryRepository.update(category);
+        return mapper.toDto(updatedCategory);
     }
 
     @Override
     public void deleteCategory(UUID id) {
-
+        categoryRepository.deleteById(id);
     }
 }
