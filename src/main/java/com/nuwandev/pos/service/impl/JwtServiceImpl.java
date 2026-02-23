@@ -1,6 +1,7 @@
 package com.nuwandev.pos.service.impl;
 
 import com.nuwandev.pos.service.JwtService;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
@@ -53,5 +54,22 @@ public class JwtServiceImpl implements JwtService {
 
     public ResponseCookie getCleanJwtCookie() {
         return ResponseCookie.from("jwt-token", null).path("/").maxAge(0).build();
+    }
+
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    }
+
+    private boolean isTokenExpired(String token) {
+        return extractClaims(token).getExpiration().before(new Date());
+    }
+
+    private Claims extractClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 }
