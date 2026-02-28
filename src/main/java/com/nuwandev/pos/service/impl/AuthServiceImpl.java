@@ -1,4 +1,4 @@
-package com.nuwandev.pos.service.impl.AuthService;
+package com.nuwandev.pos.service.impl;
 
 import com.nuwandev.pos.model.User;
 import com.nuwandev.pos.model.dto.request.LoginRequest;
