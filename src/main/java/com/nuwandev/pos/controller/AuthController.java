@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
@@ -26,7 +27,11 @@ public class AuthController {
     public ResponseEntity<ApiResponse<Void>> register(@RequestBody RegisterRequest req) {
         authService.register(req);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("User registered successfully"));
+                .body(ApiResponse.<Void>builder()
+                        .success(true)
+                        .message("Terminal access granted. Registration complete.")
+                        .timestamp(LocalDateTime.now())
+                        .build());
     }
 
     @PostMapping("/login")
@@ -38,7 +43,12 @@ public class AuthController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(ApiResponse.success("Login successful", data));
+                .body(ApiResponse.<AuthResponse>builder()
+                        .success(true)
+                        .message("Authentication successful. Session initialized.")
+                        .data(data)
+                        .timestamp(LocalDateTime.now())
+                        .build());
     }
 
     @PostMapping("/logout")
@@ -46,18 +56,38 @@ public class AuthController {
         ResponseCookie cookie = authService.logout();
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(ApiResponse.success("Logged out successfully"));
+                .body(ApiResponse.<Void>builder()
+                        .success(true)
+                        .message("Terminal session closed successfully.")
+                        .timestamp(LocalDateTime.now())
+                        .build());
     }
 
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<AuthResponse>> getCurrentUser(Authentication authentication) {
+        // If the JWT filter passes but authentication is null, the session is invalid
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error("Not authenticated"));
+                    .body(ApiResponse.<AuthResponse>builder()
+                            .success(false)
+                            .message("Session expired or invalid.")
+                            .timestamp(LocalDateTime.now())
+                            .build());
         }
 
         User user = (User) authentication.getPrincipal();
-        AuthResponse data = new AuthResponse("Session active", user.getUsername(), user.getRole());
-        return ResponseEntity.ok(ApiResponse.success("User profile retrieved", data));
+
+        AuthResponse data = AuthResponse.builder()
+                .username(user.getUsername())
+                .fullName(user.getFullName())
+                .role(user.getRole())
+                .build();
+
+        return ResponseEntity.ok(ApiResponse.<AuthResponse>builder()
+                .success(true)
+                .message("User profile synchronized.")
+                .data(data)
+                .timestamp(LocalDateTime.now())
+                .build());
     }
 }

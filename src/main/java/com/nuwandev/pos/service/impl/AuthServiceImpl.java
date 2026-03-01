@@ -13,7 +13,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,10 +27,10 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder encoder;
     private final JwtService jwtService;
 
+    @Override
     public void register(RegisterRequest req) {
-
         if (userRepo.existsByUsername(req.getUsername())) {
-            throw new DuplicateResourceException("ID '" + req.getUsername() + "' is already in use.");
+            throw new DuplicateResourceException("Username '" + req.getUsername() + "' is already in use.");
         }
 
         if (userRepo.existsByEmail(req.getEmail())) {
@@ -50,26 +49,26 @@ public class AuthServiceImpl implements AuthService {
         userRepo.save(user);
     }
 
+    @Override
     public Map<String, Object> login(LoginRequest req) {
         Authentication auth = authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(req.getIdentifier(), req.getPassword())
         );
 
-        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        User user = (User) auth.getPrincipal();
 
-        ResponseCookie cookie = jwtService.generateJwtCookie(userDetails);
-
-        String role = userDetails.getAuthorities().iterator().next().getAuthority();
+        ResponseCookie cookie = jwtService.generateJwtCookie(user);
 
         AuthResponse responseDto = AuthResponse.builder()
-                .username(userDetails.getUsername())
-                .role(role)
-                .token(null)
+                .username(user.getUsername())
+                .fullName(user.getFullName())
+                .role(user.getRole())
                 .build();
 
         return Map.of("cookie", cookie, "response", responseDto);
     }
 
+    @Override
     public ResponseCookie logout() {
         return jwtService.getCleanJwtCookie();
     }
