@@ -6,7 +6,7 @@ import com.nuwandev.pos.model.dto.response.PageResponse;
 
 public interface ItemService {
 
-    PageResponse<ItemResponseDto> getItems(int page, int size, String sortBy, String direction);
+    PageResponse<ItemResponseDto> getItems(String q, int page, int size, String sortBy, String direction);
 
     ItemResponseDto createItem(ItemRequestDto itemRequest);
 

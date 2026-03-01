@@ -175,4 +175,59 @@ public class ItemRepositoryImpl implements ItemRepository {
         Long count = jdbc.queryForObject(sql, Long.class);
         return count != null ? count : 0L;
     }
+
+    @Override
+    public List<Item> searchItems(String query, int page, int size, String sortBy, String direction) {
+        int offset = page * size;
+        String orderBy = validateSortBy(sortBy);
+        String dir = (direction != null && direction.equalsIgnoreCase("desc")) ? "DESC" : "ASC";
+
+        String searchPattern = "%" + query.toLowerCase() + "%";
+
+        String sql = """
+                SELECT BIN_TO_UUID(i.id) as id_str,
+                       i.sku, i.name, i.description, i.price,
+                       BIN_TO_UUID(i.category_id) as cat_id_str,
+                       i.created_at, i.current_stock, i.alert_level, i.updated_at,
+                       c.display_name as cat_display_name,
+                       c.tagline as cat_tagline, c.slug as cat_slug,
+                       c.visibility as cat_visibility, c.icon as cat_icon,
+                       c.seo_description as cat_seo_description,
+                       c.created_at as cat_created_at
+                FROM item i
+                LEFT JOIN category c ON i.category_id = c.id
+                WHERE LOWER(i.name) LIKE ? OR LOWER(i.sku) LIKE ?
+                ORDER BY\s""" + orderBy + " " + dir + " LIMIT ? OFFSET ?";
+
+        return jdbc.query(sql, (rs, rowNum) -> mapRow(rs), searchPattern, searchPattern, size, offset);
+    }
+
+    @Override
+    public long countSearchItems(String query) {
+        String sql = "SELECT COUNT(*) FROM item WHERE LOWER(name) LIKE ? OR LOWER(sku) LIKE ?";
+        String searchPattern = "%" + query.toLowerCase() + "%";
+        Long count = jdbc.queryForObject(sql, Long.class, searchPattern, searchPattern);
+        return count != null ? count : 0L;
+    }
+
+    @Override
+    public boolean existsBySku(String sku) {
+        String sql = "SELECT COUNT(*) FROM item WHERE sku = ?";
+        Integer count = jdbc.queryForObject(sql, Integer.class, sku);
+        return count != null && count > 0;
+    }
+
+    @Override
+    public boolean existsBySkuExcludeId(String sku, UUID uuid) {
+        String sql = "SELECT COUNT(*) FROM item WHERE sku = ? AND id != UUID_TO_BIN(?)";
+        Integer count = jdbc.queryForObject(sql, Integer.class, sku, uuid.toString());
+        return count != null && count > 0;
+    }
+
+    @Override
+    public boolean existsById(UUID uuid) {
+        String sql = "SELECT COUNT(*) FROM item WHERE id = UUID_TO_BIN(?)";
+        Integer count = jdbc.queryForObject(sql, Integer.class, uuid.toString());
+        return count != null && count > 0;
+    }
 }

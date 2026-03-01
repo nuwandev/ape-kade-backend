@@ -19,5 +19,15 @@ public interface ItemRepository {
     void deleteById(UUID id);
 
     long countItems();
+
+    List<Item> searchItems(String query, int page, int size, String sortBy, String direction);
+
+    long countSearchItems(String query);
+
+    boolean existsBySku(String sku);
+
+    boolean existsBySkuExcludeId(String sku, UUID uuid);
+
+    boolean existsById(UUID uuid);
 }
 
