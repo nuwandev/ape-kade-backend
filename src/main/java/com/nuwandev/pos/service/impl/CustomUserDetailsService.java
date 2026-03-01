@@ -15,6 +15,6 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
         return userRepository.findByIdentifier(identifier)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with identifier: " + identifier));
+                .orElseThrow(() -> new UsernameNotFoundException("Authentication Failed: identity not recognized."));
     }
 }
