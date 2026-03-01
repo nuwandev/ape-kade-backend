@@ -118,6 +118,13 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     @Override
+    public boolean existsById(UUID id) {
+        String sql = "SELECT COUNT(*) FROM customer WHERE id = UUID_TO_BIN(?)";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, id.toString());
+        return count != null && count > 0;
+    }
+
+    @Override
     public List<Customer> searchCustomer(String q, int page, int size, String sortBy, String direction) {
         int offset = page * size;
         String orderBy = validateSortBy(sortBy);

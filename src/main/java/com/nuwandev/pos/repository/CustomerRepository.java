@@ -23,4 +23,6 @@ public interface CustomerRepository {
     List<Customer> getCustomers(int page, int size, String sortBy, String direction);
 
     long countCustomers();
+
+    boolean existsById(UUID id);
 }

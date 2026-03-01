@@ -22,12 +22,13 @@ public class CustomerController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<CustomerResponseDto>>> getCustomers(
+            @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "created_at") String sortBy,
             @RequestParam(defaultValue = "asc") String direction
     ) {
-        PageResponse<CustomerResponseDto> data = customerService.getCustomers(page, size, sortBy, direction);
+        PageResponse<CustomerResponseDto> data = customerService.getCustomers(q, page, size, sortBy, direction);
         return ResponseEntity.ok(ApiResponse.success("Customers retrieved successfully", data));
     }
 
@@ -54,17 +55,5 @@ public class CustomerController {
     public ResponseEntity<ApiResponse<Void>> deleteCustomerById(@PathVariable UUID id) {
         customerService.deleteCustomerById(id);
         return ResponseEntity.ok(ApiResponse.success("Customer deleted successfully"));
-    }
-
-    @GetMapping("/search")
-    public ResponseEntity<ApiResponse<PageResponse<CustomerResponseDto>>> searchCustomer(
-            @RequestParam String q,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String direction
-    ) {
-        PageResponse<CustomerResponseDto> data = customerService.searchCustomer(q, page, size, sortBy, direction);
-        return ResponseEntity.ok(ApiResponse.success("Search results retrieved", data));
     }
 }
