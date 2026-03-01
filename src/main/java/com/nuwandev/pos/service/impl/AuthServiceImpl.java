@@ -1,5 +1,6 @@
 package com.nuwandev.pos.service.impl;
 
+import com.nuwandev.pos.exception.DuplicateResourceException;
 import com.nuwandev.pos.model.User;
 import com.nuwandev.pos.model.dto.request.LoginRequest;
 import com.nuwandev.pos.model.dto.request.RegisterRequest;
@@ -28,13 +29,24 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
 
     public void register(RegisterRequest req) {
-        User user = new User();
-        user.setId(UUID.randomUUID());
-        user.setUsername(req.getUsername());
-        user.setEmail(req.getEmail());
-        user.setFullName(req.getFullName());
-        user.setRole("CASHIER");
-        user.setPassword(encoder.encode(req.getPassword()));
+
+        if (userRepo.existsByUsername(req.getUsername())) {
+            throw new DuplicateResourceException("ID '" + req.getUsername() + "' is already in use.");
+        }
+
+        if (userRepo.existsByEmail(req.getEmail())) {
+            throw new DuplicateResourceException("Email '" + req.getEmail() + "' is already registered.");
+        }
+
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .username(req.getUsername())
+                .email(req.getEmail())
+                .fullName(req.getFullName())
+                .password(encoder.encode(req.getPassword()))
+                .role("CASHIER")
+                .build();
+
         userRepo.save(user);
     }
 
@@ -46,7 +58,14 @@ public class AuthServiceImpl implements AuthService {
         UserDetails userDetails = (UserDetails) auth.getPrincipal();
 
         ResponseCookie cookie = jwtService.generateJwtCookie(userDetails);
-        AuthResponse responseDto = new AuthResponse("Login successful", userDetails.getUsername(), "CASHIER");
+
+        String role = userDetails.getAuthorities().iterator().next().getAuthority();
+
+        AuthResponse responseDto = AuthResponse.builder()
+                .username(userDetails.getUsername())
+                .role(role)
+                .token(null)
+                .build();
 
         return Map.of("cookie", cookie, "response", responseDto);
     }

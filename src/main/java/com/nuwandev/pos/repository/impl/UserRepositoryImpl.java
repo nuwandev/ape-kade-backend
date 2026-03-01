@@ -46,4 +46,18 @@ public class UserRepositoryImpl implements UserRepository {
                 user.getRole()
         );
     }
+
+    @Override
+    public boolean existsByUsername(String username) {
+        String sql = "SELECT COUNT(*) FROM users WHERE username = ?";
+        Integer count = jdbc.queryForObject(sql, Integer.class, username);
+        return count != null && count > 0;
+    }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        String sql = "SELECT COUNT(*) FROM users WHERE email = ?";
+        Integer count = jdbc.queryForObject(sql, Integer.class, email);
+        return count != null && count > 0;
+    }
 }
