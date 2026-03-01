@@ -1,5 +1,7 @@
 package com.nuwandev.pos.service.impl;
 
+import com.nuwandev.pos.exception.DuplicateResourceException;
+import com.nuwandev.pos.exception.ResourceNotFoundException;
 import com.nuwandev.pos.mapper.CategoryMapper;
 import com.nuwandev.pos.model.Category;
 import com.nuwandev.pos.model.dto.request.CategoryRequestDto;
@@ -28,6 +30,10 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryResponseDto createCategory(CategoryRequestDto requestDto) {
+        if (!categoryRepository.isSlugAvailable(requestDto.getSlug(), null)) {
+            throw new DuplicateResourceException("The URL slug '" + requestDto.getSlug() + "' is already taken.");
+        }
+
         Category category = mapper.toEntity(requestDto);
         category.setId(UUID.randomUUID());
         category.setCreatedAt(new Timestamp(System.currentTimeMillis()));
@@ -40,7 +46,11 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryResponseDto updateCategory(UUID id, CategoryRequestDto requestDto) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category could not find ID: " + id));
+
+        if (!categoryRepository.isSlugAvailable(requestDto.getSlug(), id)) {
+            throw new DuplicateResourceException("Cannot update: Slug '" + requestDto.getSlug() + "' is used by another category.");
+        }
 
         category.setDisplayName(requestDto.getDisplayName());
         category.setTagline(requestDto.getTagline());
@@ -55,6 +65,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void deleteCategory(UUID id) {
+        if (!categoryRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Cannot delete: Category " + id + " does not exist.");
+        }
         categoryRepository.deleteById(id);
     }
 

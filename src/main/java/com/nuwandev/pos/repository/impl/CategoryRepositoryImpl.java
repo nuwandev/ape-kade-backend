@@ -100,6 +100,13 @@ public class CategoryRepositoryImpl implements CategoryRepository {
         }
     }
 
+    @Override
+    public boolean existsById(UUID id) {
+        String sql = "SELECT COUNT(*) FROM category WHERE id = UUID_TO_BIN(?)";
+        Integer count = jdbc.queryForObject(sql, Integer.class, id.toString());
+        return count != null && count > 0;
+    }
+
     public List<Category> findAllWithCount() {
         String sql = """
                     SELECT BIN_TO_UUID(c.id) as id_str,
