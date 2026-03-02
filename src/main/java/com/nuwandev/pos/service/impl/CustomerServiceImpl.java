@@ -1,6 +1,6 @@
 package com.nuwandev.pos.service.impl;
 
-import com.nuwandev.pos.exception.CustomerNotFoundException;
+import com.nuwandev.pos.exception.ResourceNotFoundException;
 import com.nuwandev.pos.mapper.CustomerMapper;
 import com.nuwandev.pos.model.Customer;
 import com.nuwandev.pos.model.dto.request.CustomerRequestDto;
@@ -31,35 +31,54 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public CustomerResponseDto getCustomerById(UUID id) {
         Customer customer = customerRepository.getCustomerById(id)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer terminal could not locate ID: " + id));
         return customerMapper.toResponseDto(customer);
     }
 
     @Override
     public void deleteCustomerById(UUID id) {
+        if (!customerRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Delete failed: Customer node " + id + " not found.");
+        }
         customerRepository.deleteCustomerById(id);
     }
 
     @Override
     public void updateCustomer(UUID id, CustomerRequestDto requestDto) {
-        customerRepository.updateCustomer(id, customerMapper.toEntity(requestDto));
+        if (!customerRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Update failed: Customer node " + id + " not found.");
+        }
+
+        Customer customer = customerMapper.toEntity(requestDto);
+        customer.setId(id);
+        customerRepository.updateCustomer(id, customer);
     }
 
     @Override
-    public PageResponse<CustomerResponseDto> getCustomers(int page, int size, String sortBy, String direction) {
-        List<Customer> customers = customerRepository.getCustomers(page, size, sortBy, direction);
-        long totalElements = customerRepository.countCustomers();
-        int totalPages = (int) Math.ceil((double) totalElements / size);
-        List<CustomerResponseDto> content = customerMapper.toResponseDtoList(customers);
-        return new PageResponse<>(content, page, size, totalElements, totalPages);
+    public PageResponse<CustomerResponseDto> getCustomers(String q, int page, int size, String sortBy, String direction) {
+        List<Customer> customers;
+        long totalElements;
+
+        if (q != null && !q.trim().isEmpty()) {
+            String query = q.trim();
+            customers = customerRepository.searchCustomer(query, page, size, sortBy, direction);
+            totalElements = customerRepository.countSearchCustomer(query);
+        } else {
+            customers = customerRepository.getCustomers(page, size, sortBy, direction);
+            totalElements = customerRepository.countCustomers();
+        }
+
+        return buildPageResponse(customers, totalElements, page, size);
     }
 
-    @Override
-    public PageResponse<CustomerResponseDto> searchCustomer(String q, int page, int size, String sortBy, String direction) {
-        List<Customer> customers = customerRepository.searchCustomer(q, page, size, sortBy, direction);
-        long totalElements = customerRepository.countSearchCustomer(q);
-        int totalPages = (int) Math.ceil((double) totalElements / size);
-        List<CustomerResponseDto> content = customerMapper.toResponseDtoList(customers);
-        return new PageResponse<>(content, page, size, totalElements, totalPages);
+    private PageResponse<CustomerResponseDto> buildPageResponse(List<Customer> content, long totalElements, int page, int size) {
+        int totalPages = (size > 0) ? (int) Math.ceil((double) totalElements / size) : 0;
+        return new PageResponse<>(
+                customerMapper.toResponseDtoList(content),
+                page,
+                size,
+                totalElements,
+                totalPages
+        );
     }
 }
