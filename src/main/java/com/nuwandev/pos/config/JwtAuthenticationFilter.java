@@ -29,15 +29,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String jwt = jwtService.getJwtFromCookies(request);
 
         if (jwt != null) {
-            String username = jwtService.extractUsername(jwt);
+            try {
+                String username = jwtService.extractUsername(jwt);
 
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                if (jwtService.isTokenValid(jwt, userDetails)) {
-                    var authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                    if (jwtService.isTokenValid(jwt, userDetails)) {
+                        var authToken = new UsernamePasswordAuthenticationToken(
+                                userDetails, null, userDetails.getAuthorities());
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                    }
                 }
+            } catch (Exception e) {
+                logger.warn("JWT validation failed: User might have been deleted from DB.");
             }
         }
         filterChain.doFilter(request, response);
