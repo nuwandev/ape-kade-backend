@@ -23,7 +23,14 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryMapper mapper;
 
     @Override
-    public List<CategoryResponseDto> getAllCategories() {
+    public List<CategoryResponseDto> getAllCategories(String query) {
+
+        if (query != null && !query.isBlank()) {
+            query = query.trim().toLowerCase();
+            List<Category> filteredCategories = categoryRepository.search(query);
+            return mapper.toDtoList(filteredCategories);
+        }
+
         List<Category> categories = categoryRepository.findAllWithCount();
         return mapper.toDtoList(categories);
     }

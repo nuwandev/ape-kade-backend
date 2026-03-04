@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface CategoryService {
-    List<CategoryResponseDto> getAllCategories();
+    List<CategoryResponseDto> getAllCategories(String query);
 
     CategoryResponseDto createCategory(CategoryRequestDto requestDto);
 

@@ -65,7 +65,6 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<AuthResponse>> getCurrentUser(Authentication authentication) {
-        // If the JWT filter passes but authentication is null, the session is invalid
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.<AuthResponse>builder()

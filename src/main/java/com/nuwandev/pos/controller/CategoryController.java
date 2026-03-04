@@ -20,8 +20,10 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<CategoryResponseDto>>> getAllCategories() {
-        List<CategoryResponseDto> categories = categoryService.getAllCategories();
+    public ResponseEntity<ApiResponse<List<CategoryResponseDto>>> getAllCategories(
+            @RequestParam(required = false) String q
+    ) {
+        List<CategoryResponseDto> categories = categoryService.getAllCategories(q);
         return ResponseEntity.ok(ApiResponse.success("Categories retrieved successfully", categories));
     }
 

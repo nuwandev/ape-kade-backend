@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface CategoryRepository {
+    List<Category> search(String query);
+
     List<Category> findAllWithCount();
 
     Category save(Category category);

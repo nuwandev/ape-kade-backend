@@ -19,15 +19,12 @@ import java.util.Date;
 @Service
 public class JwtServiceImpl implements JwtService {
 
+    private static final long EXPIRATION_TIME_SEC = 10L * 60 * 60;
     @Value("${jwt.cookie.name}")
     private String jwtCookieName;
-
     @Value("${jwt.secret}")
     private String secret;
-
     private SecretKey key;
-
-    private static final long EXPIRATION_TIME_SEC = 10L * 60 * 60;
 
     @PostConstruct
     private void initKey() {
